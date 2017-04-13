@@ -9,7 +9,7 @@
 
   <name>rollbar-log4j</name>
   <description>A Rollbar log4j and log4j2 appender</description>
-  <url>http://maven.apache.org</url>
+  <url>https://github.com/Nextdoor/rollbar-log4j</url>
 
   <licenses>
     <license>

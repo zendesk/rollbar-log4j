@@ -15,11 +15,15 @@
 
 package com.nextdoor.rollbar;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.LoggingEvent;
 
 import com.rollbar.Rollbar;
+import com.rollbar.payload.data.Server;
 
 public class RollbarLog4jAppender extends AppenderSkeleton {
 
@@ -32,7 +36,19 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
     super.activateOptions();
     if (this.accessToken != null && !this.accessToken.isEmpty() && this.environment != null
         && !this.environment.isEmpty()) {
-      this.client = new Rollbar(this.accessToken, this.environment);
+
+      Server thisNode = null;
+      try {
+        thisNode = new Server().host(InetAddress.getLocalHost().getHostName());
+      } catch (UnknownHostException | IllegalArgumentException e) {
+        LogLog.error("unable to get hostname", e);
+      }
+
+      if (thisNode != null) {
+        this.client = new Rollbar(this.accessToken, this.environment).server(thisNode);
+      } else {
+        this.client = new Rollbar(this.accessToken, this.environment);
+      }
     }
   }
 

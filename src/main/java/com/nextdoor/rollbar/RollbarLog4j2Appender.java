@@ -16,7 +16,10 @@
 package com.nextdoor.rollbar;
 
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
+import org.apache.log4j.helpers.LogLog;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -28,6 +31,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import com.rollbar.Rollbar;
+import com.rollbar.payload.data.Server;
 
 @Plugin(name = "Rollbar", category = "Core", elementType = "appender", printObject = true)
 public class RollbarLog4j2Appender extends AbstractAppender {
@@ -65,7 +69,20 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       layout = PatternLayout.createDefaultLayout();
     }
 
-    Rollbar rollbar = new Rollbar(accessToken, environment);
+    Server thisNode = null;
+    try {
+      thisNode = new Server().host(InetAddress.getLocalHost().getHostName());
+    } catch (UnknownHostException | IllegalArgumentException e) {
+      LogLog.error("unable to get hostname", e);
+    }
+
+    Rollbar rollbar;
+    if (thisNode != null) {
+      rollbar = new Rollbar(accessToken, environment).server(thisNode);
+    } else {
+      rollbar = new Rollbar(accessToken, environment);
+    }
+
     return new RollbarLog4j2Appender(name, filter, layout, true, rollbar);
   }
 

@@ -32,6 +32,12 @@
     </developer>
   </developers>
 
+  <scm>
+    <connection>scm:git:git://github.com/Nextdoor/rollbar-log4j.git</connection>
+    <developerConnection>scm:git:ssh://github.com:Nextdoor/rollbar-log4j.git</developerConnection>
+    <url>https://github.com/Nextdoor/rollbar-log4j/tree/master</url>
+  </scm>
+
   <build>
     <plugins>
       <plugin>

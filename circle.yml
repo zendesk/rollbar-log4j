@@ -4,7 +4,7 @@ machine:
 
 dependencies:
   pre:
-    - mvn dependency:resolve
+    - mvn dependency:resolve-plugins
     - echo $M2_SETTINGS | base64 --decode > ~/.m2/settings.xml
 
 compile:

@@ -15,21 +15,25 @@
 
 package com.nextdoor.rollbar;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
+import com.rollbar.notifier.config.Config;
+import com.rollbar.notifier.config.ConfigBuilder;
 import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.Level;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.LoggingEvent;
 
-import com.rollbar.Rollbar;
-import com.rollbar.payload.data.Server;
+import com.rollbar.notifier.Rollbar;
+
+import static com.rollbar.api.payload.data.Level.CRITICAL;
+import static org.apache.log4j.Level.*;
+
 
 public class RollbarLog4jAppender extends AppenderSkeleton {
 
   private String accessToken;
   private String environment;
-  private Rollbar client;
+  private String url;
+  private com.rollbar.notifier.Rollbar client;
 
   @Override
   public synchronized void activateOptions() {
@@ -37,18 +41,19 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
     if (this.accessToken != null && !this.accessToken.isEmpty() && this.environment != null
         && !this.environment.isEmpty()) {
 
-      Server thisNode = null;
-      try {
-        thisNode = new Server().host(InetAddress.getLocalHost().getHostName());
-      } catch (UnknownHostException | IllegalArgumentException e) {
-        LogLog.error("unable to get hostname", e);
+      Config config;
+      if(!this.url.isEmpty()) {
+        config = ConfigBuilder.withAccessToken(this.accessToken)
+                  .environment(this.environment)
+                  .endpoint(this.url)
+                  .build();
       }
-
-      if (thisNode != null) {
-        this.client = new Rollbar(this.accessToken, this.environment).server(thisNode);
-      } else {
-        this.client = new Rollbar(this.accessToken, this.environment);
+      else {
+        config = ConfigBuilder.withAccessToken(this.accessToken)
+                .environment(this.environment)
+                .build();
       }
+      this.client = Rollbar.init(config);
     }
   }
 
@@ -63,32 +68,32 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
   @Override
   protected void append(LoggingEvent event) {
 
-    com.rollbar.payload.data.Level rollbarLevel = null;
+    com.rollbar.api.payload.data.Level rollbarLevel;
 
     if (this.client == null || this.accessToken == null || this.environment == null) {
       LogLog.error("Rollbar client is not configured");
     }
 
-    if (event.getLevel() == org.apache.log4j.Level.INFO) {
-      rollbarLevel = com.rollbar.payload.data.Level.INFO;
-    } else if (event.getLevel() == org.apache.log4j.Level.TRACE
-        || event.getLevel() == org.apache.log4j.Level.DEBUG) {
-      rollbarLevel = com.rollbar.payload.data.Level.DEBUG;
-    } else if (event.getLevel() == org.apache.log4j.Level.WARN) {
-      rollbarLevel = com.rollbar.payload.data.Level.WARNING;
-    } else if (event.getLevel() == org.apache.log4j.Level.ERROR) {
-      rollbarLevel = com.rollbar.payload.data.Level.ERROR;
-    } else if (event.getLevel() == org.apache.log4j.Level.FATAL) {
-      rollbarLevel = com.rollbar.payload.data.Level.CRITICAL;
+    if (event.getLevel() == INFO) {
+      rollbarLevel = com.rollbar.api.payload.data.Level.INFO;
+    } else if (event.getLevel() == TRACE
+        || event.getLevel() == DEBUG) {
+      rollbarLevel = com.rollbar.api.payload.data.Level.DEBUG;
+    } else if (event.getLevel() == WARN) {
+      rollbarLevel = com.rollbar.api.payload.data.Level.WARNING;
+    } else if (event.getLevel() == ERROR) {
+      rollbarLevel = com.rollbar.api.payload.data.Level.ERROR;
+    } else if (event.getLevel() == FATAL) {
+      rollbarLevel = com.rollbar.api.payload.data.Level.CRITICAL;
     } else {
       return;
     }
 
     if (event.getThrowableInformation() != null
-        && event.getThrowableInformation().getThrowable() != null) {
+            && event.getThrowableInformation().getThrowable() != null) {
       if (event.getMessage().toString() != null) {
         this.client.log(event.getThrowableInformation().getThrowable(), event.getRenderedMessage(),
-            rollbarLevel);
+                rollbarLevel);
       } else {
         this.client.log(event.getThrowableInformation().getThrowable(), rollbarLevel);
       }
@@ -102,8 +107,14 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
     return this.environment;
   }
 
-  public void setEnvironment(String environment) {
-    this.environment = environment;
+  public void setEnvironment(String environment) { this.environment = environment; }
+
+  public String getUrl() {
+    return this.url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
   }
 
   public String getAccessToken() {

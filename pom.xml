@@ -135,10 +135,10 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.rollbar</groupId>
-      <artifactId>rollbar</artifactId>
-      <version>0.5.3</version>
-    </dependency>
+    <groupId>com.rollbar</groupId>
+    <artifactId>rollbar-java</artifactId>
+    <version>1.2.1</version>
+  </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>

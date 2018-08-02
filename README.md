@@ -32,6 +32,7 @@ Example log4j2 config:
     <Rollbar name="Rollbar">
       <accessToken>example_token</accessToken>
       <environment>production</environment>
+      <url>custom_url</url>url>
       <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
     </Rollbar>
   </Appenders>

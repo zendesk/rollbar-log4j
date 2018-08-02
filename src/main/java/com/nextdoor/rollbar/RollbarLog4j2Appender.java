@@ -19,8 +19,11 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import com.rollbar.api.payload.data.Server;
 import com.rollbar.notifier.config.Config;
 import com.rollbar.notifier.config.ConfigBuilder;
+import com.rollbar.notifier.provider.Provider;
+import com.rollbar.notifier.provider.server.ServerProvider;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
@@ -74,19 +77,31 @@ public class RollbarLog4j2Appender extends AbstractAppender {
     }
 
     Config config;
-    if(!url.isEmpty()) {
+    if(url != null && !url.isEmpty()) {
       config = ConfigBuilder.withAccessToken(accessToken)
               .environment(environment)
               .endpoint(url)
+              .server(new Provider<Server>() {
+                @Override
+                public Server provide() {
+                  return null;
+                }
+              })
               .build();
     }
     else {
       config = ConfigBuilder.withAccessToken(accessToken)
               .environment(environment)
+              .server(new Provider<Server>() {
+                @Override
+                public Server provide() {
+                  return null;
+                }
+              })
               .build();
     }
-    Rollbar rollbar = com.rollbar.notifier.Rollbar.init(config);
 
+    Rollbar rollbar = com.rollbar.notifier.Rollbar.init(config);
     return new RollbarLog4j2Appender(name, filter, layout, true, rollbar);
   }
 

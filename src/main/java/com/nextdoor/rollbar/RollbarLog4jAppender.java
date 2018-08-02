@@ -42,7 +42,7 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
         && !this.environment.isEmpty()) {
 
       Config config;
-      if(!this.url.isEmpty()) {
+      if(url != null && !url.isEmpty()) {
         config = ConfigBuilder.withAccessToken(this.accessToken)
                   .environment(this.environment)
                   .endpoint(this.url)
@@ -107,7 +107,8 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
     return this.environment;
   }
 
-  public void setEnvironment(String environment) { this.environment = environment; }
+  public void setEnvironment(String environment) {
+    this.environment = environment; }
 
   public String getUrl() {
     return this.url;

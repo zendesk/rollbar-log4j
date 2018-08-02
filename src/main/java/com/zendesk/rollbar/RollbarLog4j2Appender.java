@@ -78,7 +78,7 @@ public class RollbarLog4j2Appender extends AbstractAppender {
     }
 
     Config config;
-    if(url != null && !url.isEmpty()) {
+    if (url != null && !url.isEmpty()) {
       config = ConfigBuilder.withAccessToken(accessToken)
               .environment(environment)
               .endpoint(url)

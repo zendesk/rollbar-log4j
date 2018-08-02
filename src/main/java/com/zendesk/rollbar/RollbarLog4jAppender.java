@@ -9,7 +9,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  *
- * Copyright 2017 Zendesk.com, Inc
+ * Copyright 2018 Zendesk.com, Inc
+ * Original Copyright 2017 Nextdoor.com, Inc
  *
  */
 
@@ -108,7 +109,8 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
   }
 
   public void setEnvironment(String environment) {
-    this.environment = environment; }
+    this.environment = environment;
+  }
 
   public String getUrl() {
     return this.url;

@@ -2,14 +2,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.nextdoor.rollbar</groupId>
+  <groupId>com.zendesk.rollbar</groupId>
   <artifactId>rollbar-log4j</artifactId>
   <version>1.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>rollbar-log4j</name>
   <description>A Rollbar log4j and log4j2 appender</description>
-  <url>https://github.com/Nextdoor/rollbar-log4j</url>
+  <url>https://github.com/zendesk/rollbar-log4j</url>
 
   <licenses>
     <license>
@@ -27,17 +27,17 @@
 
   <developers>
     <developer>
-      <name>Slava Markeyev</name>
-      <email>slava@nextdoor.com</email>
-      <organization>Nextdoor</organization>
-      <organizationUrl>https://www.nextdoor.com</organizationUrl>
+      <name>Aarthi Kumar</name>
+      <email>aakumar@zendesk.com</email>
+      <organization>Zendesk</organization>
+      <organizationUrl>https://www.zendesk.com</organizationUrl>
     </developer>
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/Nextdoor/rollbar-log4j.git</connection>
-    <developerConnection>scm:git:ssh://github.com:Nextdoor/rollbar-log4j.git</developerConnection>
-    <url>https://github.com/Nextdoor/rollbar-log4j/tree/master</url>
+    <connection>scm:git:git://github.com/zendesk/rollbar-log4j.git</connection>
+    <developerConnection>scm:git:ssh://github.com:zendesk/rollbar-log4j.git</developerConnection>
+    <url>https://github.com/zendesk/rollbar-log4j/tree/master</url>
   </scm>
 
   <build>
@@ -92,7 +92,7 @@
               <relocations>
                 <relocation>
                   <pattern>com.rollbar</pattern>
-                  <shadedPattern>com.nextdoor.rollbar.com.rollbar</shadedPattern>
+                  <shadedPattern>com.zendesk.rollbar.com.rollbar</shadedPattern>
                 </relocation>
               </relocations>
               <artifactSet>

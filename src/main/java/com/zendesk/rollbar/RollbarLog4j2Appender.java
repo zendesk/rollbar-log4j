@@ -9,11 +9,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  *
- * Copyright 2017 Nextdoor.com, Inc
+ * Copyright 2018 Zendesk.com, Inc
+ * Original Copyright 2017 Nextdoor.com, Inc
  *
  */
 
-package com.nextdoor.rollbar;
+package com.zendesk.rollbar;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -81,23 +82,11 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       config = ConfigBuilder.withAccessToken(accessToken)
               .environment(environment)
               .endpoint(url)
-              .server(new Provider<Server>() {
-                @Override
-                public Server provide() {
-                  return null;
-                }
-              })
               .build();
     }
     else {
       config = ConfigBuilder.withAccessToken(accessToken)
               .environment(environment)
-              .server(new Provider<Server>() {
-                @Override
-                public Server provide() {
-                  return null;
-                }
-              })
               .build();
     }
 

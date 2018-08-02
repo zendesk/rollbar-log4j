@@ -9,16 +9,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  *
- * Copyright 2017 Nextdoor.com, Inc
+ * Copyright 2018 Zendesk.com, Inc
+ * Original Copyright 2017 Nextdoor.com, Inc
  *
  */
 
-package com.nextdoor.rollbar;
+package com.zendesk.rollbar;
 
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import com.rollbar.api.payload.data.Server;
+import com.rollbar.notifier.config.Config;
+import com.rollbar.notifier.config.ConfigBuilder;
+import com.rollbar.notifier.provider.Provider;
+import com.rollbar.notifier.provider.server.ServerProvider;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
@@ -30,8 +36,9 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
-import com.rollbar.Rollbar;
-import com.rollbar.payload.data.Server;
+import com.rollbar.notifier.Rollbar;
+
+import static org.apache.logging.log4j.Level.*;
 
 @Plugin(name = "Rollbar", category = "Core", elementType = "appender", printObject = true)
 public class RollbarLog4j2Appender extends AbstractAppender {
@@ -48,6 +55,7 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       @PluginElement("Layout") Layout<? extends Serializable> layout,
       @PluginElement("Filter") final Filter filter,
       @PluginAttribute("accessToken") String accessToken,
+      @PluginAttribute("url") String url,
       @PluginAttribute("environment") String environment) {
 
     if (name == null) {
@@ -69,37 +77,41 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       layout = PatternLayout.createDefaultLayout();
     }
 
-    Server thisNode = null;
-    try {
-      thisNode = new Server().host(InetAddress.getLocalHost().getHostName());
-    } catch (UnknownHostException | IllegalArgumentException e) {
-      LogLog.error("unable to get hostname", e);
+    Config config;
+    if (url != null && !url.isEmpty()) {
+      config = ConfigBuilder.withAccessToken(accessToken)
+              .environment(environment)
+              .endpoint(url)
+              .build();
+    }
+    else {
+      config = ConfigBuilder.withAccessToken(accessToken)
+              .environment(environment)
+              .build();
     }
 
-    Rollbar rollbar;
-    if (thisNode != null) {
-      rollbar = new Rollbar(accessToken, environment).server(thisNode);
-    } else {
-      rollbar = new Rollbar(accessToken, environment);
-    }
-
+    Rollbar rollbar = com.rollbar.notifier.Rollbar.init(config);
     return new RollbarLog4j2Appender(name, filter, layout, true, rollbar);
   }
 
   public void append(LogEvent event) {
-    com.rollbar.payload.data.Level rollbarLevel = null;
+    com.rollbar.api.payload.data.Level rollbarLevel;
 
-    if (event.getLevel() == org.apache.logging.log4j.Level.INFO) {
-      rollbarLevel = com.rollbar.payload.data.Level.INFO;
-    } else if (event.getLevel() == org.apache.logging.log4j.Level.TRACE
-        || event.getLevel() == org.apache.logging.log4j.Level.DEBUG) {
-      rollbarLevel = com.rollbar.payload.data.Level.DEBUG;
-    } else if (event.getLevel() == org.apache.logging.log4j.Level.WARN) {
-      rollbarLevel = com.rollbar.payload.data.Level.WARNING;
-    } else if (event.getLevel() == org.apache.logging.log4j.Level.ERROR) {
-      rollbarLevel = com.rollbar.payload.data.Level.ERROR;
-    } else if (event.getLevel() == org.apache.logging.log4j.Level.FATAL) {
-      rollbarLevel = com.rollbar.payload.data.Level.CRITICAL;
+    if (this.client == null) {
+      LogLog.error("Rollbar client is not configured");
+    }
+
+    if (event.getLevel() == INFO) {
+      rollbarLevel = com.rollbar.api.payload.data.Level.INFO;
+    } else if (event.getLevel() == TRACE
+            || event.getLevel() == DEBUG) {
+      rollbarLevel = com.rollbar.api.payload.data.Level.DEBUG;
+    } else if (event.getLevel() == WARN) {
+      rollbarLevel = com.rollbar.api.payload.data.Level.WARNING;
+    } else if (event.getLevel() == ERROR) {
+      rollbarLevel = com.rollbar.api.payload.data.Level.ERROR;
+    } else if (event.getLevel() == FATAL) {
+      rollbarLevel = com.rollbar.api.payload.data.Level.CRITICAL;
     } else {
       return;
     }

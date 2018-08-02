@@ -14,7 +14,7 @@ log4j.rootLogger=CONSOLE, ROLLBAR
 log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
 log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
 log4j.appender.CONSOLE.layout.ConversionPattern=[%d{MMM dd HH:mm:ss}] %-5p (%F:%L) - %m%n
-log4j.appender.ROLLBAR=com.nextdoor.rollbar.RollbarLog4jAppender
+log4j.appender.ROLLBAR=com.zendesk.rollbar.RollbarLog4jAppender
 log4j.appender.ROLLBAR.AccessToken=example_token
 log4j.appender.ROLLBAR.Environment=production
 log4j.appender.ROLLBAR.layout=org.apache.log4j.PatternLayout
@@ -24,7 +24,7 @@ log4j.appender.ROLLBAR.Threshold=ERROR
 Example log4j2 config:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration packages="com.nextdoor.rollbar">
+<Configuration packages="com.zendesk.rollbar">
   <Appenders>
     <Console name="Console">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
@@ -32,6 +32,7 @@ Example log4j2 config:
     <Rollbar name="Rollbar">
       <accessToken>example_token</accessToken>
       <environment>production</environment>
+      <url>custom_url</url>url>
       <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
     </Rollbar>
   </Appenders>

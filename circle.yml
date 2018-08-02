@@ -20,12 +20,12 @@ test:
 deployment:
   snapshot:
     branch: master
-    owner: Nextdoor
+    owner: Zendesk
     commands:
       - mvn clean deploy -DaltDeploymentRepository=ossrh::default::${SNAPSHOT_LOC} -Dgpg.skip
   release:
     tag: /[0-9]+(\.[0-9]+)*/
-    owner: Nextdoor
+    owner: Zendesk
     commands:
       - sudo apt-get install gnupg2
       - echo $GPG_KEY | base64 --decode > build.gpg

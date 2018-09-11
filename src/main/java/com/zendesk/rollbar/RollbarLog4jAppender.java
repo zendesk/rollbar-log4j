@@ -85,12 +85,13 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
       LogLog.error("Invalid hostName");
     }
 
-    Map<String, Object> custom = new HashMap<String,Object>();
-    custom.put("hostName",hostName);
-
     if (this.client == null || this.accessToken == null || this.environment == null || this.hostName == null) {
       LogLog.error("Rollbar client is not configured");
     }
+
+    Map<String, Object> custom = new HashMap<String,Object>();
+    custom.put("hostName",hostName);
+
 
     if (event.getLevel() == INFO) {
       rollbarLevel = com.rollbar.api.payload.data.Level.INFO;

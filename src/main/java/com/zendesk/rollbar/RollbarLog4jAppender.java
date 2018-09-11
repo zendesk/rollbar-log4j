@@ -92,7 +92,6 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
     Map<String, Object> custom = new HashMap<String,Object>();
     custom.put("hostName",hostName);
 
-
     if (event.getLevel() == INFO) {
       rollbarLevel = com.rollbar.api.payload.data.Level.INFO;
     } else if (event.getLevel() == TRACE
@@ -148,7 +147,11 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
     this.accessToken = accessToken;
   }
 
-  public void setHostName(String hostName) {this.hostName = hostName; }
+  public void setHostName(String hostName) {
+    this.hostName = hostName;
+  }
 
-  public String getHostName(){ return this.hostName; }
+  public String getHostName(){
+    return this.hostName;
+  }
 }

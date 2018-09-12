@@ -60,9 +60,8 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       @PluginElement("Filter") final Filter filter,
       @PluginAttribute("accessToken") String accessToken,
       @PluginAttribute("url") String url,
-      @PluginAttribute("environment") String environment)
-      @PluginAttribute("hostName") String hostName  {
-
+      @PluginAttribute("environment") String environment
+      @PluginAttribute("hostName") String hostName ) {
 
     try {
       InetAddress ip = InetAddress.getByName(hostName);

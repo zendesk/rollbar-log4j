@@ -36,9 +36,13 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
+import java.util.*;
+import java.net.*;
+
 import com.rollbar.notifier.Rollbar;
 
 import static org.apache.logging.log4j.Level.*;
+
 
 @Plugin(name = "Rollbar", category = "Core", elementType = "appender", printObject = true)
 public class RollbarLog4j2Appender extends AbstractAppender {
@@ -56,8 +60,15 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       @PluginElement("Filter") final Filter filter,
       @PluginAttribute("accessToken") String accessToken,
       @PluginAttribute("url") String url,
-      @PluginAttribute("environment") String environment) {
+      @PluginAttribute("environment") String environment)
+      @PluginAttribute("hostName") String hostName  {
 
+
+    try {
+      InetAddress ip = InetAddress.getByName(hostName);
+    }catch(Exception e){
+      LogLog.error("Invalid hostName");
+    }
     if (name == null) {
       LOGGER.error("No name provided for RollbarLog4j2Appender");
       return null;
@@ -76,6 +87,7 @@ public class RollbarLog4j2Appender extends AbstractAppender {
     if (layout == null) {
       layout = PatternLayout.createDefaultLayout();
     }
+
 
     Config config;
     if (url != null && !url.isEmpty()) {
@@ -96,6 +108,15 @@ public class RollbarLog4j2Appender extends AbstractAppender {
 
   public void append(LogEvent event) {
     com.rollbar.api.payload.data.Level rollbarLevel;
+
+    try {
+      InetAddress ip = InetAddress.getByName(hostName);
+    }catch(Exception e){
+      LogLog.error("Invalid hostName");
+    }
+
+    Map<String, Object> custom = new HashMap<String,Object>();
+    custom.put("hostName",hostName);
 
     if (this.client == null) {
       LogLog.error("Rollbar client is not configured");
@@ -118,13 +139,13 @@ public class RollbarLog4j2Appender extends AbstractAppender {
 
     if (event.getThrown() != null) {
       if (event.getMessage().toString() != null) {
-        this.client.log(event.getThrown(), event.getMessage().getFormattedMessage(), rollbarLevel);
+        this.client.log(event.getThrown(), custom, event.getMessage().getFormattedMessage(), rollbarLevel);
       } else {
-        this.client.log(event.getThrown(), rollbarLevel);
+        this.client.log(event.getThrown(), custom, rollbarLevel);
       }
 
     } else {
-      this.client.log(event.getMessage().getFormattedMessage(), rollbarLevel);
+      this.client.log(custom, event.getMessage().getFormattedMessage(), rollbarLevel);
     }
   }
 }

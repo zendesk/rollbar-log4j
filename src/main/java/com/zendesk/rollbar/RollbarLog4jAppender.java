@@ -27,13 +27,13 @@ import com.rollbar.notifier.Rollbar;
 
 import static com.rollbar.api.payload.data.Level.CRITICAL;
 import static org.apache.log4j.Level.*;
-import java.util.*;
-import java.net.*;
-
+i
 
 public class RollbarLog4jAppender extends AppenderSkeleton {
 
-  private String accessToken;
+  private String accessToken;mport java.util.*;
+import java.net.*;
+
   private String environment;
   private String url;
   private String hostName;
@@ -48,7 +48,7 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
       LogLog.error("Invalid hostName");
     }
     if (this.accessToken != null && !this.accessToken.isEmpty() && this.environment != null
-            && !this.environment.isEmpty() && !this.hostName.isEmpty() && this.hostName != null) {
+            && !this.environment.isEmpty() ) {
 
       Config config;
       if(url != null && !url.isEmpty()) {

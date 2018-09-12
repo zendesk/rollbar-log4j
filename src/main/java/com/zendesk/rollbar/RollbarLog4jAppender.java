@@ -44,25 +44,25 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
     super.activateOptions();
     try {
       InetAddress ip = InetAddress.getByName(hostName);
-      if (this.accessToken != null && !this.accessToken.isEmpty() && this.environment != null
-              && !this.environment.isEmpty()) {
-
-        Config config;
-        if(url != null && !url.isEmpty()) {
-          config = ConfigBuilder.withAccessToken(this.accessToken)
-                  .environment(this.environment)
-                  .endpoint(this.url)
-                  .build();
-        }
-        else {
-          config = ConfigBuilder.withAccessToken(this.accessToken)
-                  .environment(this.environment)
-                  .build();
-        }
-        this.client = Rollbar.init(config);
-      }
     }catch(Exception e){
       LogLog.error("Invalid hostName");
+    }
+    if (this.accessToken != null && !this.accessToken.isEmpty() && this.environment != null
+            && !this.environment.isEmpty() && !this.hostName.isEmpty() && this.hostName != null) {
+
+      Config config;
+      if(url != null && !url.isEmpty()) {
+        config = ConfigBuilder.withAccessToken(this.accessToken)
+                .environment(this.environment)
+                .endpoint(this.url)
+                .build();
+      }
+      else {
+        config = ConfigBuilder.withAccessToken(this.accessToken)
+                .environment(this.environment)
+                .build();
+      }
+      this.client = Rollbar.init(config);
     }
   }
 

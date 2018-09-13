@@ -19,6 +19,7 @@ package com.zendesk.rollbar;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.*;
 
 import com.rollbar.api.payload.data.Server;
 import com.rollbar.notifier.config.Config;
@@ -35,9 +36,6 @@ import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-
-import java.util.*;
-import java.net.*;
 
 import com.rollbar.notifier.Rollbar;
 
@@ -86,7 +84,6 @@ public class RollbarLog4j2Appender extends AbstractAppender {
     if (layout == null) {
       layout = PatternLayout.createDefaultLayout();
     }
-
 
     Config config;
     if (url != null && !url.isEmpty()) {

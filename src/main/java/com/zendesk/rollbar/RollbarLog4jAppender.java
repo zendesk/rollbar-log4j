@@ -27,27 +27,34 @@ import com.rollbar.notifier.Rollbar;
 
 import static com.rollbar.api.payload.data.Level.CRITICAL;
 import static org.apache.log4j.Level.*;
-
+import java.util.*;
+import java.net.*;
 
 public class RollbarLog4jAppender extends AppenderSkeleton {
 
   private String accessToken;
   private String environment;
   private String url;
+  private String hostName;
   private com.rollbar.notifier.Rollbar client;
 
   @Override
   public synchronized void activateOptions() {
     super.activateOptions();
+    try {
+      InetAddress ip = InetAddress.getByName(hostName);
+    }catch(Exception e){
+      LogLog.error("Invalid hostName");
+    }
     if (this.accessToken != null && !this.accessToken.isEmpty() && this.environment != null
-        && !this.environment.isEmpty()) {
+            && !this.environment.isEmpty()) {
 
       Config config;
       if(url != null && !url.isEmpty()) {
         config = ConfigBuilder.withAccessToken(this.accessToken)
-                  .environment(this.environment)
-                  .endpoint(this.url)
-                  .build();
+                .environment(this.environment)
+                .endpoint(this.url)
+                .build();
       }
       else {
         config = ConfigBuilder.withAccessToken(this.accessToken)
@@ -71,9 +78,18 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
 
     com.rollbar.api.payload.data.Level rollbarLevel;
 
-    if (this.client == null || this.accessToken == null || this.environment == null) {
+    try{
+      InetAddress ip = InetAddress.getByName(hostName);
+    }catch (Exception e){
+      LogLog.error("Invalid hostName");
+    }
+
+    if (this.client == null || this.accessToken == null || this.environment == null || this.hostName == null) {
       LogLog.error("Rollbar client is not configured");
     }
+
+    Map<String, Object> custom = new HashMap<String,Object>();
+    custom.put("hostName",hostName);
 
     if (event.getLevel() == INFO) {
       rollbarLevel = com.rollbar.api.payload.data.Level.INFO;
@@ -93,14 +109,15 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
     if (event.getThrowableInformation() != null
             && event.getThrowableInformation().getThrowable() != null) {
       if (event.getMessage().toString() != null) {
-        this.client.log(event.getThrowableInformation().getThrowable(), event.getRenderedMessage(),
+        this.client.log(event.getThrowableInformation().getThrowable(), custom, event.getRenderedMessage(),
                 rollbarLevel);
       } else {
-        this.client.log(event.getThrowableInformation().getThrowable(), rollbarLevel);
+        this.client.log(event.getThrowableInformation().getThrowable(), custom, rollbarLevel);
+
       }
 
     } else {
-      this.client.log(event.getRenderedMessage(), rollbarLevel);
+      this.client.log(event.getRenderedMessage(), custom, rollbarLevel);
     }
   }
 
@@ -126,5 +143,13 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
 
   public void setAccessToken(String accessToken) {
     this.accessToken = accessToken;
+  }
+
+  public void setHostName(String hostName) {
+    this.hostName = hostName;
+  }
+
+  public String getHostName(){
+    return this.hostName;
   }
 }

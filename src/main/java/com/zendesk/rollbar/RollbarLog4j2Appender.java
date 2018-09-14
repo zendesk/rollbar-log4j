@@ -19,6 +19,7 @@ package com.zendesk.rollbar;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.*;
 
 import com.rollbar.api.payload.data.Server;
 import com.rollbar.notifier.config.Config;
@@ -40,6 +41,7 @@ import com.rollbar.notifier.Rollbar;
 
 import static org.apache.logging.log4j.Level.*;
 
+
 @Plugin(name = "Rollbar", category = "Core", elementType = "appender", printObject = true)
 public class RollbarLog4j2Appender extends AbstractAppender {
   private final Rollbar client;
@@ -56,8 +58,14 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       @PluginElement("Filter") final Filter filter,
       @PluginAttribute("accessToken") String accessToken,
       @PluginAttribute("url") String url,
-      @PluginAttribute("environment") String environment) {
+      @PluginAttribute("environment") String environment
+      @PluginAttribute("hostName") String hostName ) {
 
+    try {
+      InetAddress ip = InetAddress.getByName(hostName);
+    }catch(Exception e){
+      LogLog.error("Invalid hostName");
+    }
     if (name == null) {
       LOGGER.error("No name provided for RollbarLog4j2Appender");
       return null;
@@ -97,6 +105,15 @@ public class RollbarLog4j2Appender extends AbstractAppender {
   public void append(LogEvent event) {
     com.rollbar.api.payload.data.Level rollbarLevel;
 
+    try {
+      InetAddress ip = InetAddress.getByName(hostName);
+    }catch(Exception e){
+      LogLog.error("Invalid hostName");
+    }
+
+    Map<String, Object> custom = new HashMap<String,Object>();
+    custom.put("hostName",hostName);
+
     if (this.client == null) {
       LogLog.error("Rollbar client is not configured");
     }
@@ -118,13 +135,13 @@ public class RollbarLog4j2Appender extends AbstractAppender {
 
     if (event.getThrown() != null) {
       if (event.getMessage().toString() != null) {
-        this.client.log(event.getThrown(), event.getMessage().getFormattedMessage(), rollbarLevel);
+        this.client.log(event.getThrown(), custom, event.getMessage().getFormattedMessage(), rollbarLevel);
       } else {
-        this.client.log(event.getThrown(), rollbarLevel);
+        this.client.log(event.getThrown(), custom, rollbarLevel);
       }
 
     } else {
-      this.client.log(event.getMessage().getFormattedMessage(), rollbarLevel);
+      this.client.log(custom, event.getMessage().getFormattedMessage(), rollbarLevel);
     }
   }
 }

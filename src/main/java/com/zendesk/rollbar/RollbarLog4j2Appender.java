@@ -45,22 +45,25 @@ import static org.apache.logging.log4j.Level.*;
 @Plugin(name = "Rollbar", category = "Core", elementType = "appender", printObject = true)
 public class RollbarLog4j2Appender extends AbstractAppender {
   private final Rollbar client;
+  private String hostName;
 
   protected RollbarLog4j2Appender(String name, Filter filter, Layout<? extends Serializable> layout,
       boolean ignoreExceptions, Rollbar client) {
     super(name, filter, layout, ignoreExceptions);
     this.client = client;
+
   }
 
   @PluginFactory
-  public static RollbarLog4j2Appender createAppender(@PluginAttribute("name") String name,
+  public RollbarLog4j2Appender createAppender(@PluginAttribute("name") String name,
       @PluginElement("Layout") Layout<? extends Serializable> layout,
       @PluginElement("Filter") final Filter filter,
       @PluginAttribute("accessToken") String accessToken,
       @PluginAttribute("url") String url,
-      @PluginAttribute("environment") String environment
+      @PluginAttribute("environment") String environment,
       @PluginAttribute("hostName") String hostName ) {
 
+    this.hostName = hostName;
     try {
       InetAddress ip = InetAddress.getByName(hostName);
     }catch(Exception e){
@@ -141,7 +144,8 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       }
 
     } else {
-      this.client.log(custom, event.getMessage().getFormattedMessage(), rollbarLevel);
+      this.client.log(event.getMessage().getFormattedMessage(), custom, rollbarLevel);
     }
   }
+
 }

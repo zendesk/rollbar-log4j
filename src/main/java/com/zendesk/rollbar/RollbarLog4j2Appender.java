@@ -45,11 +45,13 @@ import static org.apache.logging.log4j.Level.*;
 @Plugin(name = "Rollbar", category = "Core", elementType = "appender", printObject = true)
 public class RollbarLog4j2Appender extends AbstractAppender {
   private final Rollbar client;
+  private HashMap<String,Object> custom;
 
   protected RollbarLog4j2Appender(String name, Filter filter, Layout<? extends Serializable> layout,
-      boolean ignoreExceptions, Rollbar client) {
+      boolean ignoreExceptions, Rollbar client, HashMap<String,Object> custom) {
     super(name, filter, layout, ignoreExceptions);
     this.client = client;
+    this.custom = custom;
   }
 
   @PluginFactory
@@ -58,7 +60,7 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       @PluginElement("Filter") final Filter filter,
       @PluginAttribute("accessToken") String accessToken,
       @PluginAttribute("url") String url,
-      @PluginAttribute("environment") String environment
+      @PluginAttribute("environment") String environment,
       @PluginAttribute("hostName") String hostName ) {
 
     try {
@@ -66,6 +68,10 @@ public class RollbarLog4j2Appender extends AbstractAppender {
     }catch(Exception e){
       LogLog.error("Invalid hostName");
     }
+
+    HashMap<String,Object> map = new HashMap<>();
+    map.put("hostName",hostName);
+
     if (name == null) {
       LOGGER.error("No name provided for RollbarLog4j2Appender");
       return null;
@@ -99,20 +105,11 @@ public class RollbarLog4j2Appender extends AbstractAppender {
     }
 
     Rollbar rollbar = com.rollbar.notifier.Rollbar.init(config);
-    return new RollbarLog4j2Appender(name, filter, layout, true, rollbar);
+    return new RollbarLog4j2Appender(name, filter, layout, true, rollbar,map);
   }
 
   public void append(LogEvent event) {
     com.rollbar.api.payload.data.Level rollbarLevel;
-
-    try {
-      InetAddress ip = InetAddress.getByName(hostName);
-    }catch(Exception e){
-      LogLog.error("Invalid hostName");
-    }
-
-    Map<String, Object> custom = new HashMap<String,Object>();
-    custom.put("hostName",hostName);
 
     if (this.client == null) {
       LogLog.error("Rollbar client is not configured");
@@ -135,13 +132,14 @@ public class RollbarLog4j2Appender extends AbstractAppender {
 
     if (event.getThrown() != null) {
       if (event.getMessage().toString() != null) {
-        this.client.log(event.getThrown(), custom, event.getMessage().getFormattedMessage(), rollbarLevel);
+        this.client.log(event.getThrown(), this.custom, event.getMessage().getFormattedMessage(), rollbarLevel);
       } else {
-        this.client.log(event.getThrown(), custom, rollbarLevel);
+        this.client.log(event.getThrown(), this.custom, rollbarLevel);
       }
 
     } else {
-      this.client.log(custom, event.getMessage().getFormattedMessage(), rollbarLevel);
+      this.client.log(event.getMessage().getFormattedMessage(), this.custom, rollbarLevel);
     }
   }
+
 }

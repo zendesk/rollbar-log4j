@@ -45,13 +45,11 @@ import static org.apache.logging.log4j.Level.*;
 @Plugin(name = "Rollbar", category = "Core", elementType = "appender", printObject = true)
 public class RollbarLog4j2Appender extends AbstractAppender {
   private final Rollbar client;
-  private HashMap<String,Object> custom;
 
   protected RollbarLog4j2Appender(String name, Filter filter, Layout<? extends Serializable> layout,
-      boolean ignoreExceptions, Rollbar client, HashMap<String,Object> custom) {
+      boolean ignoreExceptions, Rollbar client) {
     super(name, filter, layout, ignoreExceptions);
     this.client = client;
-    this.custom = custom;
   }
 
   @PluginFactory
@@ -61,7 +59,7 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       @PluginAttribute("accessToken") String accessToken,
       @PluginAttribute("url") String url,
       @PluginAttribute("environment") String environment,
-      @PluginAttribute("hostName") String hostName ) {
+      @PluginAttribute("hostName") String hostName) {
 
     try {
       InetAddress ip = InetAddress.getByName(hostName);
@@ -69,7 +67,7 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       LogLog.error("Invalid hostName");
     }
 
-    HashMap<String,Object> map = new HashMap<>();
+    final Map<String,Object> map = new HashMap<>();
     map.put("hostName",hostName);
 
     if (name == null) {
@@ -96,16 +94,28 @@ public class RollbarLog4j2Appender extends AbstractAppender {
       config = ConfigBuilder.withAccessToken(accessToken)
               .environment(environment)
               .endpoint(url)
+              .custom(new Provider<Map<String, Object>>() {
+                @Override
+                public Map<String, Object> provide() {
+                  return map;
+                }
+              })
               .build();
     }
     else {
       config = ConfigBuilder.withAccessToken(accessToken)
               .environment(environment)
+              .custom(new Provider<Map<String, Object>>() {
+                @Override
+                public Map<String, Object> provide() {
+                  return map;
+                }
+              })
               .build();
     }
 
     Rollbar rollbar = com.rollbar.notifier.Rollbar.init(config);
-    return new RollbarLog4j2Appender(name, filter, layout, true, rollbar,map);
+    return new RollbarLog4j2Appender(name, filter, layout, true, rollbar);
   }
 
   public void append(LogEvent event) {
@@ -132,13 +142,13 @@ public class RollbarLog4j2Appender extends AbstractAppender {
 
     if (event.getThrown() != null) {
       if (event.getMessage().toString() != null) {
-        this.client.log(event.getThrown(), this.custom, event.getMessage().getFormattedMessage(), rollbarLevel);
+        this.client.log(event.getThrown(), event.getMessage().getFormattedMessage(), rollbarLevel);
       } else {
-        this.client.log(event.getThrown(), this.custom, rollbarLevel);
+        this.client.log(event.getThrown(), rollbarLevel);
       }
 
     } else {
-      this.client.log(event.getMessage().getFormattedMessage(), this.custom, rollbarLevel);
+      this.client.log(event.getMessage().getFormattedMessage(), rollbarLevel);
     }
   }
 

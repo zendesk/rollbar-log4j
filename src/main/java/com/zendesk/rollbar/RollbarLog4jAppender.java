@@ -18,6 +18,7 @@ package com.zendesk.rollbar;
 
 import com.rollbar.notifier.config.Config;
 import com.rollbar.notifier.config.ConfigBuilder;
+import com.rollbar.notifier.provider.Provider;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.helpers.LogLog;
@@ -41,11 +42,16 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
   @Override
   public synchronized void activateOptions() {
     super.activateOptions();
+
     try {
-      InetAddress ip = InetAddress.getByName(hostName);
+      InetAddress ip = InetAddress.getByName(this.hostName);
     }catch(Exception e){
       LogLog.error("Invalid hostName");
     }
+
+    final Map<String,Object> map = new HashMap<>();
+    map.put("hostName",this.hostName);
+
     if (this.accessToken != null && !this.accessToken.isEmpty() && this.environment != null
             && !this.environment.isEmpty()) {
 
@@ -54,11 +60,23 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
         config = ConfigBuilder.withAccessToken(this.accessToken)
                 .environment(this.environment)
                 .endpoint(this.url)
+                .custom(new Provider<Map<String, Object>>() {
+                  @Override
+                  public Map<String, Object> provide() {
+                    return map;
+                  }
+                })
                 .build();
       }
       else {
         config = ConfigBuilder.withAccessToken(this.accessToken)
                 .environment(this.environment)
+                .custom(new Provider<Map<String, Object>>() {
+                  @Override
+                  public Map<String, Object> provide() {
+                    return map;
+                  }
+                })
                 .build();
       }
       this.client = Rollbar.init(config);
@@ -78,18 +96,9 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
 
     com.rollbar.api.payload.data.Level rollbarLevel;
 
-    try{
-      InetAddress ip = InetAddress.getByName(hostName);
-    }catch (Exception e){
-      LogLog.error("Invalid hostName");
-    }
-
     if (this.client == null || this.accessToken == null || this.environment == null || this.hostName == null) {
       LogLog.error("Rollbar client is not configured");
     }
-
-    Map<String, Object> custom = new HashMap<String,Object>();
-    custom.put("hostName",hostName);
 
     if (event.getLevel() == INFO) {
       rollbarLevel = com.rollbar.api.payload.data.Level.INFO;
@@ -109,15 +118,15 @@ public class RollbarLog4jAppender extends AppenderSkeleton {
     if (event.getThrowableInformation() != null
             && event.getThrowableInformation().getThrowable() != null) {
       if (event.getMessage().toString() != null) {
-        this.client.log(event.getThrowableInformation().getThrowable(), custom, event.getRenderedMessage(),
+        this.client.log(event.getThrowableInformation().getThrowable(), event.getRenderedMessage(),
                 rollbarLevel);
       } else {
-        this.client.log(event.getThrowableInformation().getThrowable(), custom, rollbarLevel);
+        this.client.log(event.getThrowableInformation().getThrowable(), rollbarLevel);
 
       }
 
     } else {
-      this.client.log(event.getRenderedMessage(), custom, rollbarLevel);
+      this.client.log(event.getRenderedMessage(), rollbarLevel);
     }
   }
 

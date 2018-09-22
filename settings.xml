@@ -10,7 +10,7 @@
         <server>
             <username>${env.ARTIFACTORY_USERNAME}</username>
             <password>${env.ARTIFACTORY_API_KEY}</password>
-            <id>search-local</id>
+            <id>libs-infra-releases-local</id>
         </server>
     </servers>
     <profiles>

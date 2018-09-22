@@ -1,0 +1,12 @@
+language: java
+jdk: oraclejdk8
+before_script:
+- sudo update-java-alternatives -s java-8-oracle
+- export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+script:
+- mvn clean package --settings settings.xml
+- if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]]; then mvn deploy --settings settings.xml; fi
+addons:
+  hostname: short-hostname
+branches:
+  only: master

@@ -10,7 +10,7 @@
         <server>
             <username>${env.ARTIFACTORY_USERNAME}</username>
             <password>${env.ARTIFACTORY_API_KEY}</password>
-            <id>search-local</id>
+            <id>libs-infra-releases-local</id>
         </server>
     </servers>
     <profiles>
@@ -44,9 +44,9 @@
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
-                    <id>zen-libs-m2</id>
-                    <name>zen-libs-m2-plugins</name>
-                    <url>https://zdrepo.jfrog.io/zdrepo/zen-libs-m2</url>
+                    <id>libs-infra-releases-local</id>
+                    <name>libs-infra-releases-local</name>
+                    <url>https://zdrepo.jfrog.io/zdrepo/libs-infra-releases-local</url>
                 </pluginRepository>
                 <pluginRepository>
                     <snapshots />
